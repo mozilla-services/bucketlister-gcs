@@ -1,0 +1,43 @@
+<html>
+        <head>
+                <meta charset="UTF-8">
+                <title>Directory Listing: {{path}}</title>
+        </head>
+        <body>
+                <h1>Index of {{path}}</h1>
+                <table>
+                        <tr>
+                                <th>Type</th>
+                                <th>Name</th>
+                                <th>Size</th>
+                                <th>Last Modified</th>
+                        </tr>
+                        {% if path != "/" %}
+                        <tr>
+                                <td>Dir</td>
+                                <td><a href="{{parent}}">..</a></td>
+                                <td></td>
+                                <td></td>
+                        </tr>
+                        {% endif %}
+                        {% for dir in dirs %}
+                        <tr>
+                                <td>Dir</td>
+                                <td><a href="{{path}}{{dir}}">{{dir}}</a></td>
+                                <td></td>
+                                <td></td>
+                        </tr>
+                        {% endfor %}
+                        {% for name in files %}
+                        {% if files[name] != "." %}
+                        <tr>
+                                <td>File</td>
+                                <td><a href="{{path}}{{name}}">{{name}}</a></td>
+                                <td>{{files[name]["size"]}}</td>
+                                <td>{{files[name]["updated"]}}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                </table>
+        </body>
+</html>
