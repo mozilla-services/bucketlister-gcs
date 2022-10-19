@@ -38,7 +38,7 @@ def list_blobs_with_prefix(bucket_name, prefix):
         size = blob.size
         if ( size >= 1024 and size < 1024 * 1024 ):
             size = "{0:.0f}K".format(size / 1024)
-        else:
+        elsif ( size > 1024 ):
             size = "{0:.0f}M".format(size / (1024*1024))
         stripped_name = os.path.basename(blob.name)
         files[stripped_name] = {
