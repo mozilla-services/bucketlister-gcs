@@ -1,7 +1,8 @@
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, make_response
 from google.cloud import storage
 import os
 import datetime
+from hashlib import sha256
 
 app = Flask(__name__)
 
@@ -58,7 +59,10 @@ def list_blobs_with_prefix(bucket_name, prefix):
 @app.route('/')
 def root():
     dirs, files = list_blobs_with_prefix(BUCKET, "")
-    return render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
+    tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
+    resp = make_response( tmplt_result )
+    resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    return resp
 
 @app.route('/<path:requestpath>')
 def the_rest(requestpath):
@@ -69,7 +73,10 @@ def the_rest(requestpath):
     parent = os.path.dirname(requestpath.rstrip("/")) + "/"
     if parent == "//":
         parent = "/"
-    return render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
+    tmplt_result = render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
+    resp = make_response( tmplt_result )
+    resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    return resp
 
 
 if __name__ == '__main__':
