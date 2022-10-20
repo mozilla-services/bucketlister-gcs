@@ -8,7 +8,7 @@ from pymemcache import serde
 
 app = Flask(__name__)
 
-cache = Client(local_config.MEMCACHED_HOST, serde=serde.pickle_serde)
+cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde)
 
 @app.route('/')
 def root():

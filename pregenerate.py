@@ -4,7 +4,7 @@ from gcs import list_blobs_with_prefix
 import local_config
 from os import getenv
 
-cache = Client(local_config.MEMCACHED_HOST, serde=serde.pickle_serde)
+cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde)
 
 def cache_dir(path):
     dirs = []
