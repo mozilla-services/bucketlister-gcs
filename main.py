@@ -8,7 +8,7 @@ from pymemcache import serde
 
 app = Flask(__name__)
 
-cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde)
+cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde, connect_timeout=2, timeout=5, no_delay=True, ignore_exc=True)
 
 @app.route('/')
 def root():
@@ -26,20 +26,21 @@ def the_rest(requestpath):
         requestpath += "/"
     if ( requestpath in local_config.pregenerated_paths ):
         try:
-            dirs  = cache.get(f"{requestpath}_dirs")
-            files = cache.get(f"{requestpath}_files")
+            cache_result = cache.get_many([f"{requestpath}_dirs", f"{requestpath}_files"])
+            dirs  = cache_result.get(f"{requestpath}_dirs", None)
+            files = cache_result.get(f"{requestpath}_files", None)
         except ConnectionRefusedError:
-            pass
+            warn(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
     if (not dirs and not files):
         dirs, files = list_blobs_with_prefix(local_config.BUCKET, requestpath)
         if (len(dirs) == 0 and len(files.keys()) == 0):
             abort(404)
         if ( requestpath in local_config.pregenerated_paths ):
             try:
-                cache.set(f"{requestpath}_dirs",  dirs)
-                cache.set(f"{requestpath}_files", files)
+                cache.set(f"{requestpath}_dirs",  dirs, 600)
+                cache.set(f"{requestpath}_files", files, 600)
             except ConnectionRefusedError:
-                pass
+                warn(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
     requestpath = "/" + requestpath
     parent = path.dirname(requestpath.rstrip("/")) + "/"
     if parent == "//":
