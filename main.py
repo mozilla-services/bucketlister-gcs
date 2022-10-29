@@ -37,10 +37,10 @@ def the_rest(requestpath):
     if not requestpath.endswith("/"):
         # Seeing a lot of requests for files that shouldn't be making it here,
         # so if there's no trailing slash, let's just reject the request instead
-        # of trying to fix it
-        if requestpath.endswith("exe"):
-            abort(404)
-        requestpath += "/"
+        # of trying to fix it. The CDN shouldn't be sending any non-/ terminated
+        # paths here anyway
+        #requestpath += "/"
+        abort(404)
     if ( requestpath in local_config.pregenerated_paths ):
         try:
             cache_result = cache.get_many([f"{requestpath}_dirs", f"{requestpath}_files"])
