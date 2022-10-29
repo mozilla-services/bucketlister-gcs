@@ -13,7 +13,7 @@ cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde, connect_
 @app.before_request
 def before_request():
     #print(request.method, request.endpoint, request.headers, request.remote_addr)
-    print(request.method, request.url)
+    print(request.method, request.path)
 
 @app.route('/')
 def root():
