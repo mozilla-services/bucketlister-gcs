@@ -22,7 +22,7 @@ def root():
         dirs  = cache_result.get("_dirs", None)
         files = cache_result.get("_files", None)
     except ConnectionRefusedError:
-        warn(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
+        print(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
     if (not dirs and not files):
         dirs, files = list_blobs_with_prefix(local_config.BUCKET, "")
     tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
@@ -35,6 +35,11 @@ def the_rest(requestpath):
     dirs = []
     files = {}
     if not requestpath.endswith("/"):
+        # Seeing a lot of requests for files that shouldn't be making it here,
+        # so if there's no trailing slash, let's just reject the request instead
+        # of trying to fix it
+        if requestpath.endswith("exe"):
+            abort(404)
         requestpath += "/"
     if ( requestpath in local_config.pregenerated_paths ):
         try:
@@ -42,7 +47,7 @@ def the_rest(requestpath):
             dirs  = cache_result.get(f"{requestpath}_dirs", None)
             files = cache_result.get(f"{requestpath}_files", None)
         except ConnectionRefusedError:
-            warn(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
+            print(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
     if (not dirs and not files):
         dirs, files = list_blobs_with_prefix(local_config.BUCKET, requestpath)
         if (len(dirs) == 0 and len(files.keys()) == 0):
@@ -52,7 +57,7 @@ def the_rest(requestpath):
                 cache.set(f"{requestpath}_dirs",  dirs, 600)
                 cache.set(f"{requestpath}_files", files, 600)
             except ConnectionRefusedError:
-                warn(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
+                print(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
     requestpath = "/" + requestpath
     parent = path.dirname(requestpath.rstrip("/")) + "/"
     if parent == "//":
