@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort, make_response
+from flask import Flask, render_template, abort, make_response, request
 from gcs import list_blobs_with_prefix
 from os import path
 from hashlib import sha256
@@ -9,6 +9,10 @@ from pymemcache import serde
 app = Flask(__name__)
 
 cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde, connect_timeout=2, timeout=5, no_delay=True, ignore_exc=True)
+
+@app.before_request
+def before_request():
+    print(request.method, request.endpoint, request.headers, request.remote_addr)
 
 @app.route('/')
 def root():
