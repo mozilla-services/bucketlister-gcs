@@ -13,6 +13,8 @@ def cache_dir(path):
     start_time = perf_counter()
     dirs = []
     files = {}
+    if path == "/":
+        path = ""
     dirs, files = list_blobs_with_prefix(local_config.BUCKET, path)
     cache.set(f"{path}_dirs", dirs, 600)
     cache.set(f"{path}_files", files, 600)

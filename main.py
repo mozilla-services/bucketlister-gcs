@@ -12,7 +12,14 @@ cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde, connect_
 
 @app.route('/')
 def root():
-    dirs, files = list_blobs_with_prefix(local_config.BUCKET, "")
+    try:
+        cache_result = cache.get_many(["_dirs", "_files"])
+        dirs  = cache_result.get("_dirs", None)
+        files = cache_result.get("_files", None)
+    except ConnectionRefusedError:
+        warn(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
+    if (not dirs and not files):
+        dirs, files = list_blobs_with_prefix(local_config.BUCKET, "")
     tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()

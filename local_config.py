@@ -5,6 +5,7 @@ BUCKET           = getenv("GCS_PRODUCTDELIVERY_BUCKET", "moz-fx-productdelivery-
 
 # these paths need to end with a /
 pregenerated_paths = [
+        "/",
         "pub/firefox/releases/",
         "pub/firefox/candidates/",
         "pub/thunderbird/releases/",
