@@ -27,7 +27,8 @@ def root():
         dirs, files = list_blobs_with_prefix(local_config.BUCKET, "")
     tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
-    resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    # nginx can do this for us
+    #resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
     return resp
 
 @app.route('/<path:requestpath>')
@@ -64,7 +65,8 @@ def the_rest(requestpath):
         parent = "/"
     tmplt_result = render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
-    resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    # nginx can do this for us
+    #resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
     return resp
 
 
