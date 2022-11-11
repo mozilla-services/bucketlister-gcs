@@ -15,6 +15,11 @@ def before_request():
     #print(request.method, request.endpoint, request.headers, request.remote_addr)
     print(request.method, request.path)
 
+@app.route('/health')
+def health():
+    # FIXME: at this point, let's not do any work for the health check
+    return "OK"
+
 @app.route('/')
 def root():
     try:
