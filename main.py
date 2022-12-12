@@ -5,6 +5,7 @@ from hashlib import sha256
 import local_config
 from pymemcache.client.base import Client
 from pymemcache import serde
+import json
 
 app = Flask(__name__)
 
@@ -13,7 +14,8 @@ cache = Client(local_config.MEMCACHED_SERVER, serde=serde.pickle_serde, connect_
 @app.before_request
 def before_request():
     #print(request.method, request.endpoint, request.headers, request.remote_addr)
-    print(request.method, request.path)
+    #print(request.method, request.path)
+    pass
 
 @app.route('/health')
 def health():
@@ -30,7 +32,17 @@ def root():
         print(f"Got ConnectionRefusedError from memcached host {local_config.MEMCACHED_SERVER}")
     if (not dirs and not files):
         dirs, files = list_blobs_with_prefix(local_config.BUCKET, "")
-    tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
+    if request.headers.get('accept') == 'application/json':
+        tmplt_result = json.dumps({'prefixes': dirs,
+                                   'files': [
+                                               {'name': name,
+                                                'size': files[name]['size'],
+                                                'last_modified': files[name]['last_modified']
+                                               } for name in files.keys()
+                                            ]
+                                 })
+    else:
+        tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
     return resp
@@ -67,7 +79,17 @@ def the_rest(requestpath):
     parent = path.dirname(requestpath.rstrip("/")) + "/"
     if parent == "//":
         parent = "/"
-    tmplt_result = render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
+    if request.headers.get('accept') == 'application/json':
+        tmplt_result = json.dumps({'prefixes': dirs,
+                                   'files': [
+                                               {'name': name,
+                                                'size': files[name]['size'],
+                                                'last_modified': files[name]['last_modified']
+                                               } for name in files.keys()
+                                            ]
+                                 })
+    else:
+        tmplt_result = render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
     return resp

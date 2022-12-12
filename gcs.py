@@ -37,6 +37,7 @@ def list_blobs_with_prefix(bucket_name, prefix):
         files[stripped_name] = {
             "size": size,
             "updated": blob.updated.strftime("%d-%b-%Y %H:%M") ,
+            "last_modified": blob.updated.strftime("%Y-%m-%dT%H:%M:%SZ") , # for json responses backwards compat
         }
 
     for prefix in blobs.prefixes:
