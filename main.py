@@ -24,6 +24,7 @@ def health():
 
 @app.route('/')
 def root():
+    content_type = None
     try:
         cache_result = cache.get_many(["_dirs", "_files"])
         dirs  = cache_result.get("_dirs", None)
@@ -41,16 +42,20 @@ def root():
                                                } for name in files.keys()
                                             ]
                                  })
+        content_type = "application/json"
     else:
         tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    if content_type:
+        resp.headers['Content-Type'] = content_type
     return resp
 
 @app.route('/<path:requestpath>')
 def the_rest(requestpath):
     dirs = []
     files = {}
+    content_type = None
     if not requestpath.endswith("/"):
         # Seeing a lot of requests for files that shouldn't be making it here,
         # so if there's no trailing slash, let's just reject the request instead
@@ -88,10 +93,13 @@ def the_rest(requestpath):
                                                } for name in files.keys()
                                             ]
                                  })
+        content_type = "application/json"
     else:
         tmplt_result = render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    if content_type:
+        resp.headers['Content-Type'] = content_type
     return resp
 
 
