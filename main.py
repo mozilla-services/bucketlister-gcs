@@ -47,6 +47,7 @@ def root():
         tmplt_result = render_template('listing.html', path="/", parent=None, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    resp.headers['Vary'] = "Accept"
     if content_type:
         resp.headers['Content-Type'] = content_type
     return resp
@@ -98,6 +99,7 @@ def the_rest(requestpath):
         tmplt_result = render_template('listing.html', path=requestpath, parent=parent, dirs=dirs, files=files)
     resp = make_response( tmplt_result )
     resp.headers['ETag'] = sha256(tmplt_result.encode('utf-8')).hexdigest()
+    resp.headers['Vary'] = "Accept"
     if content_type:
         resp.headers['Content-Type'] = content_type
     return resp
