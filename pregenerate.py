@@ -2,7 +2,6 @@ from pymemcache.client.base import Client
 from pymemcache import serde
 from gcs import list_blobs_with_prefix
 import local_config
-from os import getenv
 from threading import Thread
 from time import perf_counter
 

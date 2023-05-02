@@ -5,7 +5,7 @@ Replaces fuctionality from https://github.com/mozilla-services/product-delivery-
 
 # local testing
 ```
-python -m venv venv
+python -m venv env
 source venv/bin/activate
 pip install -r requirements.txt
 python pregenerate.py
