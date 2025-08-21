@@ -1,6 +1,8 @@
 from google.cloud import storage
 import os
 
+storage_client = storage.Client()
+
 def list_blobs_with_prefix(bucket_name, prefix):
     """Lists all the blobs in the bucket that begin with the prefix.
     This can be used to list all blobs in a "folder", e.g. "public/".
@@ -19,8 +21,6 @@ def list_blobs_with_prefix(bucket_name, prefix):
     that lists the "subfolders" under `a/`:
         a/b/
     """
-
-    storage_client = storage.Client()
 
     bucket = storage_client.bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=prefix, delimiter="/", fields="prefixes,items(name,size,updated),nextPageToken")
